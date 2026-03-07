@@ -22,3 +22,4 @@ ENV/
 
 # We WANT to keep Landing/Raw in Git for now as requested by user ("I push this to GitHub")
 # unless the data files are too large.
+data_generators/ultils_data/geo_mapping.xlsx
