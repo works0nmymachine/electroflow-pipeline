@@ -1,0 +1,15 @@
+# Databricks Workspace Ignore
+# Using this file ensures that when the repo is synced to Databricks, 
+# these "local-only" tools don't clutter the production explorer.
+
+# Data Generation Toolkit (Production ignores these script files)
+data_generators/
+
+# Cache and local IDE files
+.venv/
+__pycache__/
+.vscode/
+
+# Project documentation (Keep it in Git, Hide from Workspace if desired)
+docs/
+README.md
