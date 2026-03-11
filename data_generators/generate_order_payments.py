@@ -13,6 +13,14 @@ def generate_order_payments_csv():
     with open(order_file, "r") as f:
         orders = json.load(f)
 
+    product_file = "data/raw/products.csv"
+    if not os.path.exists(product_file):
+        print(f"Error: {product_file} not found. Generate products first.")
+        return
+        
+    products_df = pd.read_csv(product_file)
+    product_prices = dict(zip(products_df['product_id'].astype(str), products_df['base_price']))
+
     payments = []
     payment_types = [    "iDEAL", 
     "Mastercard", 
@@ -27,7 +35,20 @@ def generate_order_payments_csv():
     
     for order in orders:
         order_id = order["order_id"]
-        total_value = order["total_order_value"]
+        
+        # Recalculate total value
+        subtotal = 0
+        for item in order["items"]:
+            p_id = str(item["product_id"])
+            qty = item["quantity"]
+            price = product_prices.get(p_id, 0.0)
+            subtotal += price * qty
+            
+        shipping_cost = order["shipping_cost"]
+        tax_pct = order["tax_percentage"]
+        
+        tax_amount = (subtotal + shipping_cost) * tax_pct
+        total_value = round(subtotal + shipping_cost + tax_amount, 2)
         
         # 1 Payment method per order
         p_type = random.choice(payment_types)

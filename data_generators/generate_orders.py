@@ -16,9 +16,8 @@ def generate_orders_json(num_records=5000):
         print("Dependency Error: Ensure customers.csv and products.csv exist.")
         return
 
-    # Load products to lookup prices for financial totals
-    products_df = pd.read_csv(product_file)
-    product_prices = dict(zip(products_df['product_id'].astype(str), products_df['base_price']))
+    # Load products to lookup prices for financial totals is NO LONGER needed here
+    # We leave the price lookup logic to Gold Layer and Payment generator
 
     orders = []
     statuses = ["delivered", "shipped", "canceled", "processing", "unavailable"]
@@ -47,29 +46,21 @@ def generate_orders_json(num_records=5000):
         if status == "delivered" and carrier_dt:
             customer_dt = carrier_dt + timedelta(days=random.randint(2, 5))
 
-        # --- Items & Financials ---
+        # --- Items ---
         order_items = []
-        subtotal = 0
         num_items = random.randint(1, 4)
         
         for _ in range(num_items):
             p_id = str(select_valid_id(product_file, "product_id"))
-            price = product_prices.get(p_id, 0.0)
             qty = random.randint(1, 3)
-            item_total = round(price * qty, 2)
-            subtotal += item_total
             
             order_items.append({
                 "product_id": p_id,
-                "quantity": qty,
-                "unit_price": price,
-                "item_total": item_total
+                "quantity": qty
             })
 
         shipping_cost = round(random.uniform(5.0, 25.0), 2)
         tax_pct = random.choice([0.05, 0.07, 0.10, 0.21]) # Sample tax brackets
-        tax_amount = round((subtotal + shipping_cost) * tax_pct, 2)
-        total_value = round(subtotal + shipping_cost + tax_amount, 2)
 
         order = {
             "order_id": str(random.randint(100000, 999999)),
@@ -84,13 +75,10 @@ def generate_orders_json(num_records=5000):
             # Logistics
             "shipping_zip_code": fake.postcode(),
             "shipping_city": fake.city(),
-            # Financials
+            # Financials (only native facts)
             "payment_currency": "USD", # simplify for now
-            "subtotal": round(subtotal, 2),
             "shipping_cost": shipping_cost,
             "tax_percentage": tax_pct,
-            "tax_amount": tax_amount,
-            "total_order_value": total_value,
             "items": order_items
         }
         
