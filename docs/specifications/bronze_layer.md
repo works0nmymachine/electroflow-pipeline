@@ -1,39 +1,27 @@
-# 🥉 ElectroFlow: Bronze Layer Documentation
+# Bronze Layer
 
-The **Bronze Layer** is the first stop for data in our Medallion Architecture. Its primary job is to ingest raw data from the **Landing Zone** while preserving history and providing a stable foundation for downstream cleaning.
+The Bronze layer is the first step in the pipeline. It takes the raw files from the landing zone and loads them into Delta tables without any transformations.
 
-## 🎯 Primary Goals
-- **Zero-Loss Ingestion**: We load data exactly as it was received. No cleaning or filtering happens here.
-- **Modernization**: Convert raw CSV and JSON files into the **Delta Lake** format.
-- **Metadata Enrichment**: Add lineage information (ingestion timestamp, source file name).
-- **History Tracking**: Maintain an immutable history of all data loads.
+## What It Does
 
----
+- Reads CSV and JSON files from the Databricks Volume (`/Volumes/dev/electroflow_pipeline/landing_data/`)
+- Converts them to Delta format
+- Adds metadata columns for traceability:
+  - `_ingestion_timestamp` — when the data was loaded
+  - `_source_file_path` — which file it came from
+  - `_ingestion_job_id` — unique ID for the run
+- Saves everything as managed tables in Unity Catalog (`dev.electroflow_pipeline.bronze_*`)
 
-## 🏗️ Implementation Guidelines
+## Why No Cleaning?
 
-### 1. File Format Normalization
-While the landing zone contains mixed formats (CSV, JSON), the Bronze layer consolidates everything into **Delta**. This provides:
-- **ACID Transactions**: No partial or corrupted writes.
-- **Time Travel**: Allows us to query data as it looked at a specific point in time.
-- **Schema Evolution**: Handles unexpected changes in source file structures.
+The Bronze layer is meant to be a raw copy. I don't want to lose any data at this stage — even if it has duplicates or messy formats. All the cleaning happens in Silver.
 
-### 2. Standard Metadata Columns
-Every Bronze table MUST include the following technical metadata:
-- `_ingestion_timestamp`: UTC time of the data load.
-- `_source_file_path`: Path to the original file in Landing.
-- `_ingestion_job_id`: Unique identifier for the run.
+## Tables Created
 
----
-
-## 🛠️ Typical Loading Logic (Landing ➡️ Bronze)
-1. **Discover**: Identify new files in [**`00_landing/raw/`**](electroflow-pipeline/00_landing/raw/).
-2. **Schema Influx**: Read the files with `inferSchema=true` or use a curated schema.
-3. **Metadata**: Use `withColumn()` to inject the required audit fields.
-4. **Append**: Save the result to [**`01_bronze/delta/`**](electroflow-pipeline/01_bronze/delta/) using `.mode("append")`.
-
-## 📜 Next Steps
-After data is captured in Bronze, it moves to the **Silver Layer** where we perform deduplication, enforce schemas, and resolve data quality issues found in the mock generation process (like missing phone numbers).
-
----
-*For more details on the final data structure, see the [Gold Layer Guide](electroflow-pipeline/docs/specifications/gold_layer.md) (coming soon).*
+| Table | Source File |
+|:---|:---|
+| `bronze_customers` | `customers.csv` |
+| `bronze_products` | `products.csv` |
+| `bronze_orders` | `orders.json` |
+| `bronze_payments` | `order_payments.csv` |
+| `bronze_coupons` | `coupons.csv` |
