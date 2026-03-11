@@ -32,7 +32,7 @@ def generate_coupons_csv():
             })
             
     df = pd.DataFrame(coupons)
-    output_path = "00_landing/raw/coupons.csv"
+    output_path = "data/raw/coupons.csv"
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     df.to_csv(output_path, index=False)
     print(f"Generated {len(df)} coupons to {output_path}.")

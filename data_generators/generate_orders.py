@@ -9,8 +9,8 @@ from utils.integrity_utils import select_valid_id
 fake = Faker()
 
 def generate_orders_json(num_records=5000):
-    customer_file = "00_landing/raw/customers.csv"
-    product_file = "00_landing/raw/products.csv"
+    customer_file = "data/raw/customers.csv"
+    product_file = "data/raw/products.csv"
     
     if not os.path.exists(customer_file) or not os.path.exists(product_file):
         print("Dependency Error: Ensure customers.csv and products.csv exist.")
@@ -96,7 +96,7 @@ def generate_orders_json(num_records=5000):
         
         orders.append(order)
     
-    output_path = "00_landing/raw/orders.json"
+    output_path = "data/raw/orders.json"
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w") as f:
         json.dump(orders, f, indent=4)

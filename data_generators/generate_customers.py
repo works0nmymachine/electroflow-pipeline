@@ -126,7 +126,7 @@ def generate_customers_csv(num_records=1000,
     df = pd.DataFrame(customers)
     df = pd.concat([df, df.sample(frac=0.05)]) # Add duplicates
     
-    output_path = "00_landing/raw/customers.csv"
+    output_path = "data/raw/customers.csv"
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     df.to_csv(output_path, index=False)
     print(f"Generated {len(df)} customers with synced City/Zip from mapping to {output_path}.")

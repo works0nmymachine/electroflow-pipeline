@@ -13,3 +13,4 @@ __pycache__/
 # Project documentation (Keep it in Git, Hide from Workspace if desired)
 docs/
 README.md
+\ndata/\n
